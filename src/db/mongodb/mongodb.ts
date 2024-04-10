@@ -1,1 +1,1 @@
-export class Mongodb {}
+export class Mongodb { }
