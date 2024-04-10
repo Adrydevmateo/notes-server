@@ -18,16 +18,28 @@ export class MongodbService {
         })
     }
 
-    async Run() {
+    async Exec(fn: Function) {
         try {
             await this.client.connect()
-            await this.client.db('admin').command({ ping: 1 })
-            console.log("Pinged your deployment. You successfully connected to MongoDB!");
+            return await fn()
         } catch (error: unknown) {
             if (error instanceof MongoServerError) console.log('Error worth logging: ' + error)
             throw error
         } finally {
             await this.client.close()
         }
+    }
+
+    READ() {
+        return this.Exec(async () => {
+            const db = this.client.db('notesv1')
+            const coll = db.collection('user')
+            const cursor = coll.find()
+            const result = []
+            for await (const doc of cursor) {
+                result.push(doc)
+            }
+            return result
+        })
     }
 }

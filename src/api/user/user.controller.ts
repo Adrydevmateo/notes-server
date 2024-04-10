@@ -8,6 +8,6 @@ export class UserController {
 
     @Get()
     Read() {
-        this.service.READ()
+        return this.service.READ()
     }
 }
