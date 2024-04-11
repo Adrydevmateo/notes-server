@@ -1,22 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { MongodbService } from 'src/db/mongodb/mongodb.service';
-import { IUser } from './user.interface';
+import { IUser, TUserFound, TValidateUser } from './user.interface';
 
 @Injectable()
 export class UserService {
-    constructor(private mongoService: MongodbService) { }
+	constructor(private mongoService: MongodbService) { }
 
-    CREATE() { }
+	CREATE() {
+		this.mongoService.CREATE()
+	}
 
-    async READ() {
-        const rs: Array<IUser> = await this.mongoService.READ()
-        for (const r of rs) {
-            console.dir(r.notes)
-        }
-        return rs[0].notes[2].content
-    }
+	async READ() {
+		const rs: Array<IUser> = await this.mongoService.READ()
+		return rs
+	}
 
-    UPDATE() { }
+	async ValidateUser(e: string, p: string): Promise<TValidateUser> {
+		const rs: TUserFound | null = await this.mongoService.READ_BY_EMAIL(e)
+		if (rs === null) return { msg: "User Not Found", OK: false }
+		if (rs.password === p)
+			return { data: rs, OK: true }
+		else
+			return { msg: 'Incorrect Password', OK: false }
+	}
 
-    DELETE() { }
+	UPDATE() {
+		this.mongoService.UPDATE()
+	}
+
+	DELETE() {
+		this.mongoService.DELETE()
+	}
 }
