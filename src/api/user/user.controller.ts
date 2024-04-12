@@ -28,7 +28,7 @@ export class UserController {
 
 	@Post('sign-in')
 	async SignIn(@Body() rq: TSignInDto): Promise<TSignInResponse> {
-		const u = await this.service.ValidateUser(rq.email, rq.password)
+		const u = await this.service.ValidateUser(rq.name, rq.password)
 		if (!u.OK) throw new HttpException(u.msg, HttpStatus.UNAUTHORIZED)
 		return { OK: true, msg: 'AUTHORIZED' }
 	}

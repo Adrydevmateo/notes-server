@@ -25,9 +25,7 @@ export class MongodbService {
 			await this.client.connect()
 			return await fn()
 		} catch (error: unknown) {
-			if (error instanceof MongoServerError) console.log('[SERVER ERROR]: ' + error)
-			if (error instanceof WriteError) console.log('[WRITE ERROR]: ' + error)
-			if (error instanceof WriteConcernError) console.log('[WRITE CONCERN ERROR]: ' + error)
+			if (error) console.log('[ERROR]: ' + error)
 			throw error
 		} finally {
 			await this.client.close()
@@ -39,7 +37,7 @@ export class MongodbService {
 			const coll = this.db.collection('user')
 			await coll.insertOne(
 				{
-					"email": "service1@dmc.com",
+					"name": "service1@dmc.com",
 					"password": "123",
 					"notes": [
 						{
@@ -66,11 +64,11 @@ export class MongodbService {
 		})
 	}
 
-	READ_BY_EMAIL(e: string) {
+	READ_BY_NAME(e: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
 			const cursor = await coll.findOne(
-				{ email: e },
+				{ name: e },
 				{ projection: { _id: 0, notes: 0 } }
 			)
 			return cursor
@@ -82,7 +80,7 @@ export class MongodbService {
 			const coll = this.db.collection('user')
 			await coll.updateOne(
 				{ _id: new ObjectId('66160564a1fda35ce414c3c5') },
-				{ $set: { email: "vModified@gmail.com", password: "123123123" } }
+				{ $set: { name: "vModified@gmail.com", password: "123123123" } }
 			)
 		})
 	}

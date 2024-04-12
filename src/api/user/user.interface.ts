@@ -1,11 +1,11 @@
 export interface IUser {
 	id: string
-	email: string
+	name: string
 	password: string
 	notes: Array<TNote>
 }
 
-export type TUserFound = { email: string, password: string }
+export type TUserFound = { name: string, password: string }
 
 type TNote = {
 	id: string
@@ -17,9 +17,9 @@ type TNote = {
 export type TValidateUser = {
 	OK?: boolean,
 	msg?: string,
-	data?: { email: string, password: string }
+	data?: { name: string, password: string }
 }
 
-export type TSignInDto = { email: string, password: string }
+export type TSignInDto = { name: string, password: string }
 
 export type TSignInResponse = { OK: boolean, msg?: string }

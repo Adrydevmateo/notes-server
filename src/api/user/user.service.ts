@@ -16,7 +16,7 @@ export class UserService {
 	}
 
 	async ValidateUser(e: string, p: string): Promise<TValidateUser> {
-		const rs: TUserFound | null = await this.mongoService.READ_BY_EMAIL(e)
+		const rs: TUserFound | null = await this.mongoService.READ_BY_NAME(e)
 		if (rs === null) return { msg: "User Not Found", OK: false }
 		if (rs.password === p)
 			return { data: rs, OK: true }
