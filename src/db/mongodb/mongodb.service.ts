@@ -32,23 +32,10 @@ export class MongodbService {
 		}
 	}
 
-	CREATE() {
+	CREATE(user) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
-			await coll.insertOne(
-				{
-					"name": "service1@dmc.com",
-					"password": "123",
-					"notes": [
-						{
-							"id": crypto.randomUUID(),
-							"title": "title from service 1",
-							"description": "description from service 1",
-							"content": "\u003Ch2\u003EFirst Note From Service 1\u003C/h2\u003E"
-						},
-					]
-				},
-			)
+			return await coll.insertOne(user)
 		})
 	}
 
@@ -64,11 +51,11 @@ export class MongodbService {
 		})
 	}
 
-	READ_BY_NAME(e: string) {
+	READ_BY_USER_NAME(e: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
 			const cursor = await coll.findOne(
-				{ name: e },
+				{ username: e },
 				{ projection: { _id: 0, notes: 0 } }
 			)
 			return cursor
@@ -80,7 +67,7 @@ export class MongodbService {
 			const coll = this.db.collection('user')
 			await coll.updateOne(
 				{ _id: new ObjectId('66160564a1fda35ce414c3c5') },
-				{ $set: { name: "vModified@gmail.com", password: "123123123" } }
+				{ $set: { username: "vModified@gmail.com", password: "123123123" } }
 			)
 		})
 	}
