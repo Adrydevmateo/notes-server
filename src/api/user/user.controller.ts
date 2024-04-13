@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Post } from '@nestjs/common';
 import { UserService } from './user.service';
-import { TCreateUserDTO, TCreateUserResponse, TSignInDTO, TSignInResponse } from './user.interface';
+import { TUserCRUDResponse, TUserDTO } from './user.interface';
 
 @Controller('user')
 export class UserController {
@@ -8,34 +8,42 @@ export class UserController {
 
 	@Get()
 	READ() {
-		return this.service.READ()
+		return this.service.FindUsers()
 	}
 
-	@Get('update')
-	UPDATE() {
-		this.service.UPDATE()
-	}
-
-	@Get('del')
+	@Get('delete')
 	DELETE() {
 		this.service.DELETE()
 	}
 
 	@Post('create')
-	async CREATE(@Body() rq: TCreateUserDTO): Promise<TCreateUserResponse> {
+	async CREATE(@Body() rq: TUserDTO): Promise<TUserCRUDResponse> {
 		const u = await this.service.CREATE({
 			"username": rq.username,
-			"password": rq.password,
-			"notes": rq.notes
+			"password": rq.password
 		})
 		if (!u.OK) throw new HttpException(u.msg, HttpStatus.NOT_ACCEPTABLE)
 		return { OK: true, msg: u.msg }
 	}
 
 	@Post('sign-in')
-	async SignIn(@Body() rq: TSignInDTO): Promise<TSignInResponse> {
-		const u = await this.service.ValidateUser(rq.username, rq.password)
+	async SignIn(@Body() rq: TUserDTO): Promise<TUserCRUDResponse> {
+		const u = await this.service.ValidateSignInUser(rq.username, rq.password)
 		if (!u.OK) throw new HttpException(u.msg, HttpStatus.UNAUTHORIZED)
 		return { OK: true, msg: 'AUTHORIZED' }
 	}
+
+	// @Post('update')
+	// async UPDATE(@Body() rq: TUpdateUserDTO): Promise<TUpdateUserResponse> {
+	// 	const u = await this.service.UPDATE(rq)
+	// 	if (!u.OK) throw new HttpException(u.msg, HttpStatus.NOT_ACCEPTABLE)
+	// 	return { OK: true, msg: u.msg }
+	// }
+
+	// @Post('update-note')
+	// async UpdateUserNote(@Body() rq: TUpdateUserNoteDTO): Promise<TUpdateUserNoteResponse> {
+	// 	const u = await this.service.UpdateUserNote(rq)
+	// 	if (!u.OK) throw new HttpException(u.msg, HttpStatus.NOT_ACCEPTABLE)
+	// 	return { OK: true, msg: u.msg }
+	// }
 }

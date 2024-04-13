@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Db, MongoClient, MongoServerError, ObjectId, ServerApiVersion, WriteConcernError, WriteError } from 'mongodb'
+import { TNote } from 'src/api/user/user.interface';
 
 @Injectable()
 export class MongodbService {
@@ -32,43 +33,69 @@ export class MongodbService {
 		}
 	}
 
-	CREATE(user) {
+	CREATE(user: unknown) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
 			return await coll.insertOne(user)
 		})
 	}
 
-	READ() {
+	READ_USERS() {
 		return this.Exec(async () => {
-			const coll = this.db.collection('user')
-			const cursor = coll.find()
+			const collection = this.db.collection('user')
+			const users = collection.find()
 			const result = []
-			for await (const doc of cursor) {
-				result.push(doc)
+			for await (const user of users) {
+				result.push(user)
 			}
 			return result
 		})
 	}
 
-	READ_BY_USER_NAME(e: string) {
+	READ_BY_USER_ID(id: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
 			const cursor = await coll.findOne(
-				{ username: e },
-				{ projection: { _id: 0, notes: 0 } }
+				{ _id: new ObjectId(id) },
+				{ projection: { notes: 0 } }
 			)
 			return cursor
 		})
 	}
 
-	UPDATE() {
+	READ_BY_USER_NAME(n: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
-			await coll.updateOne(
-				{ _id: new ObjectId('66160564a1fda35ce414c3c5') },
-				{ $set: { username: "vModified@gmail.com", password: "123123123" } }
+			const cursor = await coll.findOne(
+				{ username: n },
+				{ projection: { notes: 0 } }
 			)
+			return cursor
+		})
+	}
+
+	UPDATE(u: any) {
+		return this.Exec(async () => {
+			const coll = this.db.collection('user')
+			return await coll.updateOne(
+				{ _id: { $oid: u.id } },
+				{
+					$set: {
+						username: u.username,
+						password: u.password,
+					}
+				}
+			)
+		})
+	}
+
+	// TODO: FIX
+	UPDATE_USER_NOTE(id: string, n: TNote) {
+		return this.Exec(async () => {
+			const coll = this.db.collection('user')
+			// const r = await coll.updateOne()
+
+			// console.log('[Result]: ', r)
 		})
 	}
 
