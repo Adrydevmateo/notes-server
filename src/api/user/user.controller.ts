@@ -7,8 +7,13 @@ export class UserController {
 	constructor(private service: UserService) { }
 
 	@Get()
-	READ() {
+	GetUsers() {
 		return this.service.FindUsers()
+	}
+
+	@Get('notes')
+	GetNotes() {
+		return this.service.FindNotes()
 	}
 
 	@Get('delete')

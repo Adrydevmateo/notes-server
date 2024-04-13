@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { MongodbService } from 'src/db/mongodb/mongodb.service';
-import { IUser, TUserCRUDResponse, TUserDTO } from './user.interface';
+import { IUser, TNoteDTO, TUserCRUDResponse, TUserDTO } from './user.interface';
 
 @Injectable()
 export class UserService {
@@ -22,8 +22,13 @@ export class UserService {
 		return { msg: 'User Is Valid', OK: true }
 	}
 
-	async FindUsers() {
+	async FindUsers(): Promise<Array<TUserDTO>> {
 		const users: Array<TUserDTO> = await this.mongoService.READ_USERS()
+		return users
+	}
+
+	async FindNotes(): Promise<Array<TNoteDTO>> {
+		const users: Array<TNoteDTO> = await this.mongoService.READ_NOTES()
 		return users
 	}
 

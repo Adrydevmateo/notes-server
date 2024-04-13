@@ -52,6 +52,18 @@ export class MongodbService {
 		})
 	}
 
+	READ_NOTES() {
+		return this.Exec(async () => {
+			const collection = this.db.collection('note')
+			const notes = collection.find()
+			const result = []
+			for await (const note of notes) {
+				result.push(note)
+			}
+			return result
+		})
+	}
+
 	READ_BY_USER_ID(id: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
