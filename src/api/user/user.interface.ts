@@ -15,7 +15,7 @@ export type TNote = {
 
 export type TUserDTO = { id?: string, username?: string, password?: string }
 
-export type TNoteDTO = { id?: string, title?: string, description?: string, ownerId?: string }
+export type TNoteDTO = { id?: string, title?: string, description?: string, content: string, ownerId?: string }
 
 export type TUserCRUDResponse = { OK?: boolean, msg?: string, data?: TUserDTO }
 

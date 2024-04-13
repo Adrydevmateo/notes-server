@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Db, MongoClient, MongoServerError, ObjectId, ServerApiVersion, WriteConcernError, WriteError } from 'mongodb'
-import { TNote } from 'src/api/user/user.interface';
+import { TNote, TNoteDTO, TUserDTO } from 'src/api/user/user.interface';
 
 @Injectable()
 export class MongodbService {
@@ -33,10 +33,11 @@ export class MongodbService {
 		}
 	}
 
-	CREATE(user: unknown) {
+	CREATE_USER(user: TUserDTO) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
-			return await coll.insertOne(user)
+			const created = await coll.insertOne(user)
+			return created
 		})
 	}
 
@@ -52,36 +53,10 @@ export class MongodbService {
 		})
 	}
 
-	READ_NOTES() {
-		return this.Exec(async () => {
-			const collection = this.db.collection('note')
-			const notes = collection.find()
-			const result = []
-			for await (const note of notes) {
-				result.push(note)
-			}
-			return result
-		})
-	}
-
-	READ_BY_USER_ID(id: string) {
+	READ_USER_BY_NAME(username: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
-			const cursor = await coll.findOne(
-				{ _id: new ObjectId(id) },
-				{ projection: { notes: 0 } }
-			)
-			return cursor
-		})
-	}
-
-	READ_BY_USER_NAME(n: string) {
-		return this.Exec(async () => {
-			const coll = this.db.collection('user')
-			const cursor = await coll.findOne(
-				{ username: n },
-				{ projection: { notes: 0 } }
-			)
+			const cursor = await coll.findOne({ username: username })
 			return cursor
 		})
 	}
@@ -101,6 +76,42 @@ export class MongodbService {
 		})
 	}
 
+	DELETE() {
+		return this.Exec(async () => {
+			const coll = this.db.collection('user')
+			await coll.deleteOne({ _id: new ObjectId('66160564a1fda35ce414c3c5') })
+		})
+	}
+
+	//#region Note
+	CREATE_NOTE(note: TNoteDTO) {
+		return this.Exec(async () => {
+			const coll = this.db.collection('note')
+			const created = await coll.insertOne(note)
+			return created
+		})
+	}
+
+	READ_NOTES() {
+		return this.Exec(async () => {
+			const collection = this.db.collection('note')
+			const notes = collection.find()
+			const result = []
+			for await (const note of notes) {
+				result.push(note)
+			}
+			return result
+		})
+	}
+
+	READ_NOTE_BY_ID(id: string) {
+		return this.Exec(async () => {
+			const coll = this.db.collection('note')
+			const cursor = await coll.findOne({ _id: new ObjectId(id) })
+			return cursor
+		})
+	}
+
 	// TODO: FIX
 	UPDATE_USER_NOTE(id: string, n: TNote) {
 		return this.Exec(async () => {
@@ -110,11 +121,5 @@ export class MongodbService {
 			// console.log('[Result]: ', r)
 		})
 	}
-
-	DELETE() {
-		return this.Exec(async () => {
-			const coll = this.db.collection('user')
-			await coll.deleteOne({ _id: new ObjectId('66160564a1fda35ce414c3c5') })
-		})
-	}
+	//#endregion Note
 }

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Post } from '@nestjs/common';
 import { UserService } from './user.service';
-import { TUserCRUDResponse, TUserDTO } from './user.interface';
+import { TNoteCRUDResponse, TNoteDTO, TUserCRUDResponse, TUserDTO } from './user.interface';
 
 @Controller('user')
 export class UserController {
@@ -11,32 +11,19 @@ export class UserController {
 		return this.service.FindUsers()
 	}
 
-	@Get('notes')
-	GetNotes() {
-		return this.service.FindNotes()
+	@Post('create-user')
+	async CreateUser(@Body() reqBody: TUserDTO): Promise<TUserCRUDResponse | any> {
+		const created = await this.service.CreateUser(reqBody)
+		if (!created.OK) throw new HttpException(created.msg, HttpStatus.NOT_ACCEPTABLE)
+		return { msg: created.msg, OK: true }
 	}
 
-	@Get('delete')
-	DELETE() {
-		this.service.DELETE()
-	}
-
-	@Post('create')
-	async CREATE(@Body() rq: TUserDTO): Promise<TUserCRUDResponse> {
-		const u = await this.service.CREATE({
-			"username": rq.username,
-			"password": rq.password
-		})
-		if (!u.OK) throw new HttpException(u.msg, HttpStatus.NOT_ACCEPTABLE)
-		return { OK: true, msg: u.msg }
-	}
-
-	@Post('sign-in')
-	async SignIn(@Body() rq: TUserDTO): Promise<TUserCRUDResponse> {
-		const u = await this.service.ValidateSignInUser(rq.username, rq.password)
-		if (!u.OK) throw new HttpException(u.msg, HttpStatus.UNAUTHORIZED)
-		return { OK: true, msg: 'AUTHORIZED' }
-	}
+	// @Post('sign-in')
+	// async SignIn(@Body() rq: TUserDTO): Promise<TUserCRUDResponse> {
+	// 	const u = await this.service.ValidateSignInUser(rq.username, rq.password)
+	// 	if (!u.OK) throw new HttpException(u.msg, HttpStatus.UNAUTHORIZED)
+	// 	return { OK: true, msg: 'AUTHORIZED' }
+	// }
 
 	// @Post('update')
 	// async UPDATE(@Body() rq: TUpdateUserDTO): Promise<TUpdateUserResponse> {
@@ -51,4 +38,18 @@ export class UserController {
 	// 	if (!u.OK) throw new HttpException(u.msg, HttpStatus.NOT_ACCEPTABLE)
 	// 	return { OK: true, msg: u.msg }
 	// }
+
+	//#region Note
+	@Get('notes')
+	GetNotes() {
+		return this.service.FindNotes()
+	}
+
+	@Post('create-note')
+	async CreateNote(@Body() reqBody: TNoteDTO): Promise<TNoteCRUDResponse> {
+		const created = await this.service.CreateNote(reqBody)
+		if (!created.OK) throw new HttpException(created.msg, HttpStatus.NOT_ACCEPTABLE)
+		return { msg: created.msg, OK: true }
+	}
+	//#endregion Note
 }

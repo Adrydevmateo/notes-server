@@ -1,25 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { MongodbService } from 'src/db/mongodb/mongodb.service';
-import { IUser, TNoteDTO, TUserCRUDResponse, TUserDTO } from './user.interface';
+import { IUser, TNoteCRUDResponse, TNoteDTO, TUserCRUDResponse, TUserDTO } from './user.interface';
 
 @Injectable()
 export class UserService {
 	constructor(private mongoService: MongodbService) { }
 
-	async CREATE(u: TUserDTO): Promise<TUserCRUDResponse> {
-		const v = await this.ValidateCreateUser(u)
-		if (!v.OK) return { msg: v.msg, OK: false }
-		const rs = await this.mongoService.CREATE(u)
-		if (rs.acknowledged) return { msg: 'User Created Successfully', OK: true }
-		if (!rs.acknowledged) return { msg: 'Could Not Create User', OK: false }
+	async CreateUser(user: TUserDTO): Promise<TUserCRUDResponse> {
+		const valid = await this.ValidateCreateUser(user)
+		if (!valid.OK) return { msg: valid.msg, OK: false }
+		const created = await this.mongoService.CREATE_USER({
+			username: user.username,
+			password: user.password
+		})
+		if (!created.acknowledged) return { msg: '[Invalid Operation]: could not create user', OK: false }
+		return { msg: 'User created successfully', OK: true }
 	}
 
-	private async ValidateCreateUser(u: TUserDTO): Promise<TUserCRUDResponse> {
-		if (typeof u.username !== 'string') return { msg: 'Username Is Not a String', OK: false }
-		const rs: TUserDTO | null = await this.mongoService.READ_BY_USER_NAME(u.username)
-		if (rs !== null) return { msg: 'User Already Exist', OK: false }
-		if (typeof u.password !== 'string') return { msg: 'Password Is Not a String', OK: false }
-		return { msg: 'User Is Valid', OK: true }
+	private async ValidateCreateUser(user: TUserDTO): Promise<TUserCRUDResponse> {
+		if (!user.username) return { msg: '[Missing Field]: username was not provided', OK: false }
+		if (typeof user.username !== 'string') return { msg: '[Invalid Field]: username is not a string', OK: false }
+
+		if (!user.password) return { msg: '[Missing Field]: password was not provided', OK: false }
+		if (typeof user.password !== 'string') return { msg: '[Invalid Field]: password is not a string', OK: false }
+
+		const found: TUserCRUDResponse | null = await this.FindUserByName(user.username)
+		if (found.OK) return { msg: '[Invalid Operation]: user already exist', OK: false }
+
+		return { msg: 'User is valid', OK: true }
 	}
 
 	async FindUsers(): Promise<Array<TUserDTO>> {
@@ -27,19 +35,20 @@ export class UserService {
 		return users
 	}
 
-	async FindNotes(): Promise<Array<TNoteDTO>> {
-		const users: Array<TNoteDTO> = await this.mongoService.READ_NOTES()
-		return users
+	private async FindUserByName(username: string): Promise<TUserCRUDResponse> {
+		const found: TUserDTO | null = await this.mongoService.READ_USER_BY_NAME(username)
+		if (found === null) return { msg: '[Not Found]: user could not be found', OK: false }
+		if (found !== null) return { msg: 'User has been found', OK: true, data: found }
 	}
 
-	async ValidateSignInUser(n: string, p: string): Promise<TUserCRUDResponse> {
-		const rs: TUserDTO | null = await this.mongoService.READ_BY_USER_NAME(n)
-		if (rs === null) return { msg: "User Not Found", OK: false }
-		if (rs.password === p)
-			return { data: rs, OK: true }
-		else
-			return { msg: 'Incorrect Password', OK: false }
-	}
+	// async ValidateSignInUser(n: string, p: string): Promise<TUserCRUDResponse> {
+	// 	const rs: TUserDTO | null = await this.mongoService.READ_BY_USER_NAME(n)
+	// 	if (rs === null) return { msg: "User Not Found", OK: false }
+	// 	if (rs.password === p)
+	// 		return { data: rs, OK: true }
+	// 	else
+	// 		return { msg: 'Incorrect Password', OK: false }
+	// }
 
 	// async UPDATE(u: TUserDTO): Promise<TUserCRUDResponse> {
 	// 	if (!u.id) return { msg: 'ID Was Not Provided', OK: false }
@@ -90,4 +99,43 @@ export class UserService {
 	DELETE() {
 		this.mongoService.DELETE()
 	}
+
+	//#region Note
+	async CreateNote(note: TNoteDTO): Promise<TNoteCRUDResponse> {
+		const valid = await this.ValidateCreateNote(note)
+		if (!valid.OK) return { msg: valid.msg, OK: false }
+		const created = await this.mongoService.CREATE_NOTE({
+			ownerId: note.ownerId,
+			title: note.title,
+			description: note.description ?? "",
+			content: note.content ?? ""
+		})
+		if (!created.acknowledged) return { msg: 'Could Not Create User', OK: false }
+		return { msg: 'User Created Successfully', OK: true }
+	}
+
+	private async ValidateCreateNote(note: TNoteDTO): Promise<TNoteCRUDResponse> {
+		if (!note.ownerId) return { msg: '[Missing Field]: note owner id was not provided', OK: false }
+		if (typeof note.ownerId !== 'string') return { msg: '[Invalid Field]: note owner id is not a string', OK: false }
+
+		if (!note.title) return { msg: '[Missing Field]: note title was not provided', OK: false }
+		if (typeof note.title !== 'string') return { msg: '[Invalid Field]: note title is not a string', OK: false }
+
+		const found: TNoteCRUDResponse | null = await this.FindNote(note.id)
+		if (found.OK) return { msg: 'Note already exist', OK: false }
+
+		return { msg: 'Note is valid', OK: true }
+	}
+
+	async FindNotes(): Promise<Array<TNoteDTO>> {
+		const notes: Array<TNoteDTO> = await this.mongoService.READ_NOTES()
+		return notes
+	}
+
+	private async FindNote(id: string): Promise<TNoteCRUDResponse> {
+		const found: TNoteDTO | null = await this.mongoService.READ_NOTE_BY_ID(id)
+		if (found === null) return { msg: '[Not Found]: note could not be found', OK: false }
+		if (found !== null) return { msg: 'Note has been found', OK: true, data: found }
+	}
+	//#endregion Note
 }
