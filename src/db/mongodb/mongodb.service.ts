@@ -76,10 +76,11 @@ export class MongodbService {
 		})
 	}
 
-	DELETE() {
+	DELETE_USER(id: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
-			await coll.deleteOne({ _id: new ObjectId('66160564a1fda35ce414c3c5') })
+			const deleted = await coll.deleteOne({ _id: new ObjectId(id) })
+			return deleted
 		})
 	}
 
@@ -119,6 +120,16 @@ export class MongodbService {
 			// const r = await coll.updateOne()
 
 			// console.log('[Result]: ', r)
+		})
+	}
+
+	DELETE_NOTE(ownerId: string) {
+		return this.Exec(async () => {
+			const coll = this.db.collection('note')
+			const deleted = await coll.deleteOne({
+				ownerId: ownerId
+			})
+			return deleted
 		})
 	}
 	//#endregion Note

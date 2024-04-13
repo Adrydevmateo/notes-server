@@ -19,10 +19,10 @@ export class UserService {
 
 	private async ValidateCreateUser(user: TUserDTO): Promise<TUserCRUDResponse> {
 		if (!user.username) return { msg: '[Missing Field]: username was not provided', OK: false }
-		if (typeof user.username !== 'string') return { msg: '[Invalid Field]: username is not a string', OK: false }
+		if (typeof user.username !== 'string') return { msg: '[Invalid Type]: username is not a string', OK: false }
 
 		if (!user.password) return { msg: '[Missing Field]: password was not provided', OK: false }
-		if (typeof user.password !== 'string') return { msg: '[Invalid Field]: password is not a string', OK: false }
+		if (typeof user.password !== 'string') return { msg: '[Invalid Type]: password is not a string', OK: false }
 
 		const found: TUserCRUDResponse | null = await this.FindUserByName(user.username)
 		if (found.OK) return { msg: '[Invalid Operation]: user already exist', OK: false }
@@ -96,8 +96,11 @@ export class UserService {
 	// 	return { msg: 'Note Is Valid', OK: true }
 	// }
 
-	DELETE() {
-		this.mongoService.DELETE()
+	// TODO: Delete User Must Also Delete All It's Notes
+	async DeleteUser(id: string): Promise<TUserCRUDResponse> {
+		const deleted = await this.mongoService.DELETE_USER(id)
+		if (!deleted.acknowledged) return { msg: '[Invalid Operation]: could not delete user', OK: false }
+		return { msg: 'User deleted successfully', OK: true }
 	}
 
 	//#region Note
@@ -116,10 +119,10 @@ export class UserService {
 
 	private async ValidateCreateNote(note: TNoteDTO): Promise<TNoteCRUDResponse> {
 		if (!note.ownerId) return { msg: '[Missing Field]: note owner id was not provided', OK: false }
-		if (typeof note.ownerId !== 'string') return { msg: '[Invalid Field]: note owner id is not a string', OK: false }
+		if (typeof note.ownerId !== 'string') return { msg: '[Invalid Type]: note owner id is not a string', OK: false }
 
 		if (!note.title) return { msg: '[Missing Field]: note title was not provided', OK: false }
-		if (typeof note.title !== 'string') return { msg: '[Invalid Field]: note title is not a string', OK: false }
+		if (typeof note.title !== 'string') return { msg: '[Invalid Type]: note title is not a string', OK: false }
 
 		const found: TNoteCRUDResponse | null = await this.FindNote(note.id)
 		if (found.OK) return { msg: 'Note already exist', OK: false }
@@ -136,6 +139,14 @@ export class UserService {
 		const found: TNoteDTO | null = await this.mongoService.READ_NOTE_BY_ID(id)
 		if (found === null) return { msg: '[Not Found]: note could not be found', OK: false }
 		if (found !== null) return { msg: 'Note has been found', OK: true, data: found }
+	}
+
+	async DeleteNote(ownerId: string): Promise<TNoteCRUDResponse> {
+		if (!ownerId) return { msg: '[Missing Field]: owner id was not provided', OK: false }
+		if (typeof ownerId !== 'string') return { msg: '[Invalid Type]: owner id is not a string', OK: false }
+		const deleted = await this.mongoService.DELETE_NOTE(ownerId)
+		if (!deleted.acknowledged) return { msg: '[Invalid Operation]: could not delete note', OK: false }
+		return { msg: 'Note deleted successfully', OK: true }
 	}
 	//#endregion Note
 }

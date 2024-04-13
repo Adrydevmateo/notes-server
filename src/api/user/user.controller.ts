@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { TNoteCRUDResponse, TNoteDTO, TUserCRUDResponse, TUserDTO } from './user.interface';
 
@@ -11,11 +11,18 @@ export class UserController {
 		return this.service.FindUsers()
 	}
 
-	@Post('create-user')
+	@Post()
 	async CreateUser(@Body() reqBody: TUserDTO): Promise<TUserCRUDResponse | any> {
 		const created = await this.service.CreateUser(reqBody)
 		if (!created.OK) throw new HttpException(created.msg, HttpStatus.NOT_ACCEPTABLE)
 		return { msg: created.msg, OK: true }
+	}
+
+	@Delete()
+	async DeleteUser(@Body() reqBody: { userId: string }): Promise<TUserCRUDResponse> {
+		const deleted = await this.service.DeleteUser(reqBody.userId)
+		if (!deleted.OK) throw new HttpException(deleted.msg, HttpStatus.NOT_ACCEPTABLE)
+		return { msg: deleted.msg, OK: true }
 	}
 
 	// @Post('sign-in')
@@ -50,6 +57,13 @@ export class UserController {
 		const created = await this.service.CreateNote(reqBody)
 		if (!created.OK) throw new HttpException(created.msg, HttpStatus.NOT_ACCEPTABLE)
 		return { msg: created.msg, OK: true }
+	}
+
+	@Delete('delete-note')
+	async DeleteNote(@Body() reqBody: { ownerId: string }): Promise<TNoteCRUDResponse> {
+		const deleted = await this.service.DeleteNote(reqBody.ownerId)
+		if (!deleted.OK) throw new HttpException(deleted.msg, HttpStatus.NOT_ACCEPTABLE)
+		return { msg: deleted.msg, OK: true }
 	}
 	//#endregion Note
 }
