@@ -78,9 +78,11 @@ export class MongodbService {
 
 	DELETE_USER(id: string) {
 		return this.Exec(async () => {
-			const coll = this.db.collection('user')
-			const deleted = await coll.deleteOne({ _id: new ObjectId(id) })
-			return deleted
+			const userCollection = this.db.collection('user')
+			const noteCollection = this.db.collection('note')
+			const deletedUser = await userCollection.deleteOne({ _id: new ObjectId(id) })
+			const deletedNote = await noteCollection.deleteMany({ ownerId: id });
+			return deletedUser
 		})
 	}
 

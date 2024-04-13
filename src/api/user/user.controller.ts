@@ -19,8 +19,8 @@ export class UserController {
 	}
 
 	@Delete()
-	async DeleteUser(@Body() reqBody: { userId: string }): Promise<TUserCRUDResponse> {
-		const deleted = await this.service.DeleteUser(reqBody.userId)
+	async DeleteUser(@Body() reqBody: { id: string }): Promise<TUserCRUDResponse> {
+		const deleted = await this.service.DeleteUser(reqBody.id)
 		if (!deleted.OK) throw new HttpException(deleted.msg, HttpStatus.NOT_ACCEPTABLE)
 		return { msg: deleted.msg, OK: true }
 	}
