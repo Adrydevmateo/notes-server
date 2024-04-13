@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Patch, Post } from '@nestjs/common';
 import { UserService } from './user.service';
 import { TNoteCRUDResponse, TNoteDTO, TUserCRUDResponse, TUserDTO } from './user.interface';
 
@@ -12,10 +12,17 @@ export class UserController {
 	}
 
 	@Post()
-	async CreateUser(@Body() reqBody: TUserDTO): Promise<TUserCRUDResponse | any> {
+	async CreateUser(@Body() reqBody: TUserDTO): Promise<TUserCRUDResponse> {
 		const created = await this.service.CreateUser(reqBody)
 		if (!created.OK) throw new HttpException(created.msg, HttpStatus.NOT_ACCEPTABLE)
 		return { msg: created.msg, OK: true }
+	}
+
+	@Patch()
+	async UpdateUser(@Body() reqBody: TUserDTO): Promise<TUserCRUDResponse> {
+		const updated = await this.service.UpdateUser(reqBody)
+		if (!updated.OK) throw new HttpException(updated.msg, HttpStatus.NOT_ACCEPTABLE)
+		return { msg: updated.msg, OK: true }
 	}
 
 	@Delete()
@@ -30,20 +37,6 @@ export class UserController {
 	// 	const u = await this.service.ValidateSignInUser(rq.username, rq.password)
 	// 	if (!u.OK) throw new HttpException(u.msg, HttpStatus.UNAUTHORIZED)
 	// 	return { OK: true, msg: 'AUTHORIZED' }
-	// }
-
-	// @Post('update')
-	// async UPDATE(@Body() rq: TUpdateUserDTO): Promise<TUpdateUserResponse> {
-	// 	const u = await this.service.UPDATE(rq)
-	// 	if (!u.OK) throw new HttpException(u.msg, HttpStatus.NOT_ACCEPTABLE)
-	// 	return { OK: true, msg: u.msg }
-	// }
-
-	// @Post('update-note')
-	// async UpdateUserNote(@Body() rq: TUpdateUserNoteDTO): Promise<TUpdateUserNoteResponse> {
-	// 	const u = await this.service.UpdateUserNote(rq)
-	// 	if (!u.OK) throw new HttpException(u.msg, HttpStatus.NOT_ACCEPTABLE)
-	// 	return { OK: true, msg: u.msg }
 	// }
 
 	//#region Note

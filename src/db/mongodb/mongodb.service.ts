@@ -53,6 +53,14 @@ export class MongodbService {
 		})
 	}
 
+	READ_USER_BY_ID(id: string) {
+		return this.Exec(async () => {
+			const coll = this.db.collection('user')
+			const cursor = await coll.findOne({ _id: new ObjectId(id) })
+			return cursor
+		})
+	}
+
 	READ_USER_BY_NAME(username: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
@@ -61,18 +69,19 @@ export class MongodbService {
 		})
 	}
 
-	UPDATE(u: any) {
+	UPDATE_USER(user: TUserDTO) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
-			return await coll.updateOne(
-				{ _id: { $oid: u.id } },
+			const updated = await coll.updateOne(
+				{ _id: new ObjectId(user.id) },
 				{
 					$set: {
-						username: u.username,
-						password: u.password,
+						username: user.username,
+						password: user.password,
 					}
 				}
 			)
+			return updated
 		})
 	}
 
@@ -82,7 +91,7 @@ export class MongodbService {
 			const noteCollection = this.db.collection('note')
 			const deletedUser = await userCollection.deleteOne({ _id: new ObjectId(id) })
 			const deletedNote = await noteCollection.deleteMany({ ownerId: id });
-			return deletedUser
+			return { deletedUser, deletedNote }
 		})
 	}
 
@@ -115,22 +124,10 @@ export class MongodbService {
 		})
 	}
 
-	// TODO: FIX
-	UPDATE_USER_NOTE(id: string, n: TNote) {
-		return this.Exec(async () => {
-			const coll = this.db.collection('user')
-			// const r = await coll.updateOne()
-
-			// console.log('[Result]: ', r)
-		})
-	}
-
 	DELETE_NOTE(ownerId: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('note')
-			const deleted = await coll.deleteOne({
-				ownerId: ownerId
-			})
+			const deleted = await coll.deleteOne({ ownerId: ownerId })
 			return deleted
 		})
 	}
