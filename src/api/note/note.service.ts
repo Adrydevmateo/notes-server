@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { TNoteCRUDResponse, TNoteDTO, TNoteUpsertDTO } from './note.interface';
 import { MongodbService } from 'src/db/mongodb/mongodb.service';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class NoteService {
@@ -10,7 +11,7 @@ export class NoteService {
 		const valid = await this.ValidateCreateNote(note)
 		if (!valid.OK) return { msg: valid.msg, OK: false }
 		const created = await this.mongoService.CREATE_NOTE({
-			ownerId: note.ownerId,
+			ownerId: new ObjectId(note.ownerId) as any,
 			title: note.title,
 			description: note.description ?? "",
 			content: note.content ?? ""
@@ -34,6 +35,11 @@ export class NoteService {
 
 	async FindNotes(): Promise<Array<TNoteDTO>> {
 		const notes: Array<TNoteDTO> = await this.mongoService.READ_NOTES()
+		return notes
+	}
+
+	async FindNotesByOwner(ownerId: string): Promise<Array<TNoteDTO>> {
+		const notes: Array<TNoteDTO> = await this.mongoService.READ_NOTES_BY_OWNER(ownerId)
 		return notes
 	}
 

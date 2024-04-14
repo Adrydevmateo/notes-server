@@ -103,6 +103,8 @@ export class UserService {
 
 	//#region Delete
 	async DeleteUser(id: string): Promise<TUserCRUDResponse> {
+		if (!id) return { msg: '[Missing Field]: user id was not provided', OK: false }
+		if (typeof id !== 'string') return { msg: '[Invalid Type]: user id is not a string', OK: false }
 		const { deletedUser, deletedNote } = await this.mongoService.DELETE_USER(id)
 		if (!deletedUser.acknowledged) return { msg: '[Invalid Operation]: could not delete user', OK: false }
 		if (!deletedNote.acknowledged) return { msg: '[Invalid Operation]: could not delete the notes owned by the user', OK: false }

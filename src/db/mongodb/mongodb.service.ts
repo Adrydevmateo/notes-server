@@ -92,7 +92,7 @@ export class MongodbService {
 			const userCollection = this.db.collection('user')
 			const noteCollection = this.db.collection('note')
 			const deletedUser = await userCollection.deleteOne({ _id: new ObjectId(id) })
-			const deletedNote = await noteCollection.deleteMany({ ownerId: id });
+			const deletedNote = await noteCollection.deleteMany({ ownerId: new ObjectId(id) });
 			return { deletedUser, deletedNote }
 		})
 	}
@@ -113,6 +113,21 @@ export class MongodbService {
 			const notes = collection.find()
 			const result = []
 			for await (const note of notes) {
+				result.push(note)
+			}
+			return result
+		})
+	}
+
+	READ_NOTES_BY_OWNER(ownerId: string) {
+		return this.Exec(async () => {
+			const collection = this.db.collection('note')
+			const notes = collection.find({
+				ownerId: new ObjectId(ownerId)
+			})
+			const result = []
+			for await (const note of notes) {
+				console.log('Note: ', note)
 				result.push(note)
 			}
 			return result
@@ -141,7 +156,7 @@ export class MongodbService {
 		})
 	}
 
-	DELETE_NOTE(ownerId: string) {
+	DELETE_NOTE(ownerId: ObjectId) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('note')
 			const deleted = await coll.deleteOne({ ownerId: ownerId })

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, HttpException, HttpStatus, Param } from '@nestjs/common';
 import { NoteService } from './note.service';
 import { TNoteCRUDResponse, TNoteDTO } from './note.interface';
 
@@ -9,6 +9,11 @@ export class NoteController {
 	@Get()
 	GetNotes() {
 		return this.service.FindNotes()
+	}
+
+	@Get(':ownerId')
+	GetNotesByOwner(@Param() ownerId: string) {
+		return this.service.FindNotesByOwner(ownerId)
 	}
 
 	@Post()
