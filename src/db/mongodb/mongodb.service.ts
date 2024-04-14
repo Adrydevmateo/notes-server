@@ -34,6 +34,7 @@ export class MongodbService {
 		}
 	}
 
+	//#region User
 	CREATE_USER(user: TUserDTO) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('user')
@@ -95,6 +96,7 @@ export class MongodbService {
 			return { deletedUser, deletedNote }
 		})
 	}
+	//#endregion User
 
 	//#region Note
 	CREATE_NOTE(note: TNoteDTO) {

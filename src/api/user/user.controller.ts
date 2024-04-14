@@ -18,6 +18,13 @@ export class UserController {
 		return { msg: created.msg, OK: true }
 	}
 
+	@Post('sign-in')
+	async SignIn(@Body() reqBody: TUserDTO): Promise<TUserCRUDResponse> {
+		const authorized = await this.service.SignIn(reqBody)
+		if (!authorized.OK) throw new HttpException(authorized.msg, HttpStatus.UNAUTHORIZED)
+		return { msg: authorized.msg, OK: true }
+	}
+
 	@Patch()
 	async UpdateUser(@Body() reqBody: TUserDTO): Promise<TUserCRUDResponse> {
 		const updated = await this.service.UpdateUser(reqBody)
@@ -31,11 +38,4 @@ export class UserController {
 		if (!deleted.OK) throw new HttpException(deleted.msg, HttpStatus.NOT_ACCEPTABLE)
 		return { msg: deleted.msg, OK: true }
 	}
-
-	// @Post('sign-in')
-	// async SignIn(@Body() rq: TUserDTO): Promise<TUserCRUDResponse> {
-	// 	const u = await this.service.ValidateSignInUser(rq.username, rq.password)
-	// 	if (!u.OK) throw new HttpException(u.msg, HttpStatus.UNAUTHORIZED)
-	// 	return { OK: true, msg: 'AUTHORIZED' }
-	// }
 }

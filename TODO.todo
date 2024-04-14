@@ -1,2 +1,4 @@
 [] - Add encryption capabilities
 		| URL: https://docs.nestjs.com/security/encryption-and-hashing
+[] - Clean Code
+		| Must do it in a separate branch

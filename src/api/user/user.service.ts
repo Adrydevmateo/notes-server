@@ -6,6 +6,7 @@ import { TUserCRUDResponse, TUserDTO } from './user.interface';
 export class UserService {
 	constructor(private mongoService: MongodbService) { }
 
+	//#region Create
 	async CreateUser(user: TUserDTO): Promise<TUserCRUDResponse> {
 		const valid = await this.ValidateCreateUser(user)
 		if (!valid.OK) return { msg: valid.msg, OK: false }
@@ -29,7 +30,9 @@ export class UserService {
 
 		return { msg: 'User is valid', OK: true }
 	}
+	//#endregion Create
 
+	//#region Find
 	async FindUsers(): Promise<Array<TUserDTO>> {
 		const users: Array<TUserDTO> = await this.mongoService.READ_USERS()
 		return users
@@ -47,6 +50,28 @@ export class UserService {
 		if (found !== null) return { msg: 'User has been found', OK: true, data: found }
 	}
 
+	async SignIn(user: TUserDTO): Promise<TUserCRUDResponse> {
+		const valid = this.ValidateSignIn(user)
+		if (!valid.OK) return { msg: valid.msg, OK: false }
+		const found: TUserCRUDResponse = await this.FindUserByName(user.username)
+		if (!found.OK) return { msg: '[Not Found]: user was not found', OK: false }
+		if (found.data.password !== user.password) return { msg: '[Incorrect Value]: passwords do not coincide', OK: false }
+		return { msg: found.msg, OK: true }
+	}
+
+	ValidateSignIn(user: TUserDTO): TUserCRUDResponse {
+		if (!user.username) return { msg: '[Missing Field]: username was not provided', OK: false }
+		if (typeof user.username !== 'string') return { msg: '[Invalid Type]: username is not a string', OK: false }
+
+		if (!user.password) return { msg: '[Missing Field]: password was not provided', OK: false }
+		if (typeof user.password !== 'string') return { msg: '[Invalid Type]: password is not a string', OK: false }
+
+		return { msg: 'User is valid', OK: true }
+	}
+
+	//#endregion Find
+
+	//#region Update
 	async UpdateUser(user: TUserDTO): Promise<TUserCRUDResponse> {
 		const valid = await this.ValidateUpdateUser(user)
 		if (!valid.OK) return { msg: valid.msg, OK: false }
@@ -74,11 +99,14 @@ export class UserService {
 
 		return { msg: 'User is valid', OK: true, data: foundById.data }
 	}
+	//#endregion Update
 
+	//#region Delete
 	async DeleteUser(id: string): Promise<TUserCRUDResponse> {
 		const { deletedUser, deletedNote } = await this.mongoService.DELETE_USER(id)
 		if (!deletedUser.acknowledged) return { msg: '[Invalid Operation]: could not delete user', OK: false }
 		if (!deletedNote.acknowledged) return { msg: '[Invalid Operation]: could not delete the notes owned by the user', OK: false }
 		return { msg: 'User deleted successfully', OK: true }
 	}
+	//#endregion Delete
 }
