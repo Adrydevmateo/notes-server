@@ -156,10 +156,10 @@ export class MongodbService {
 		})
 	}
 
-	DELETE_NOTE(ownerId: ObjectId) {
+	DELETE_NOTE(ownerId: string) {
 		return this.Exec(async () => {
 			const coll = this.db.collection('note')
-			const deleted = await coll.deleteOne({ ownerId: ownerId })
+			const deleted = await coll.deleteOne({ ownerId: new ObjectId(ownerId) })
 			return deleted
 		})
 	}
