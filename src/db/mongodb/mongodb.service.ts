@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Db, MongoClient, MongoServerError, ObjectId, ServerApiVersion, WriteConcernError, WriteError } from 'mongodb'
-import { TNote, TNoteDTO, TUserDTO } from 'src/api/user/user.interface';
+import { Db, MongoClient, ObjectId, ServerApiVersion } from 'mongodb'
+import { TNoteDTO, TNoteUpsertDTO, TUserDTO } from 'src/api/user/user.interface';
 
 @Injectable()
 export class MongodbService {
@@ -121,6 +121,20 @@ export class MongodbService {
 			const coll = this.db.collection('note')
 			const cursor = await coll.findOne({ _id: new ObjectId(id) })
 			return cursor
+		})
+	}
+
+	UPDATE_NOTE(updateData: TNoteUpsertDTO) {
+		return this.Exec(async () => {
+			const coll = this.db.collection('note')
+			const updated = await coll.updateOne(
+				{ _id: { $eq: new ObjectId(updateData.id) } },
+				{
+					$set: updateData.set
+				},
+				{ upsert: true }
+			)
+			return updated
 		})
 	}
 

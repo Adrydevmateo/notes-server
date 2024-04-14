@@ -52,6 +52,13 @@ export class UserController {
 		return { msg: created.msg, OK: true }
 	}
 
+	@Patch('update-note')
+	async UpdateNote(@Body() reqBody: TNoteDTO): Promise<TNoteCRUDResponse> {
+		const updated = await this.service.UpdateNote(reqBody)
+		if (!updated.OK) throw new HttpException(updated.msg, HttpStatus.NOT_ACCEPTABLE)
+		return { msg: updated.msg, OK: true }
+	}
+
 	@Delete('delete-note')
 	async DeleteNote(@Body() reqBody: { ownerId: string }): Promise<TNoteCRUDResponse> {
 		const deleted = await this.service.DeleteNote(reqBody.ownerId)
