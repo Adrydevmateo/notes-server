@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Db, MongoClient, ObjectId, ServerApiVersion } from 'mongodb'
-import { TNoteDTO, TNoteUpsertDTO, TUserDTO } from 'src/api/user/user.interface';
+import { TNoteDTO, TNoteUpsertDTO } from 'src/api/note/note.interface';
+import { TUserDTO } from 'src/api/user/user.interface';
 
 @Injectable()
 export class MongodbService {
