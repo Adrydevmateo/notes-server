@@ -123,11 +123,10 @@ export class MongodbService {
 		return this.Exec(async () => {
 			const collection = this.db.collection('note')
 			const notes = collection.find({
-				ownerId: new ObjectId(ownerId)
+				ownerId: ownerId
 			})
 			const result = []
 			for await (const note of notes) {
-				console.log('Note: ', note)
 				result.push(note)
 			}
 			return result

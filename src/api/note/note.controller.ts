@@ -12,8 +12,8 @@ export class NoteController {
 	}
 
 	@Get(':ownerId')
-	GetNotesByOwner(@Param() ownerId: string) {
-		return this.service.FindNotesByOwner(ownerId)
+	GetNotesByOwner(@Param() params: { ownerId: string }) {
+		return this.service.FindNotesByOwner(params.ownerId)
 	}
 
 	@Post()

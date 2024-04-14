@@ -11,7 +11,7 @@ export class NoteService {
 		const valid = await this.ValidateCreateNote(note)
 		if (!valid.OK) return { msg: valid.msg, OK: false }
 		const created = await this.mongoService.CREATE_NOTE({
-			ownerId: new ObjectId(note.ownerId) as any,
+			ownerId: note.ownerId,
 			title: note.title,
 			description: note.description ?? "",
 			content: note.content ?? ""
