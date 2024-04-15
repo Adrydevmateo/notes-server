@@ -12,7 +12,8 @@ export class UserService {
 		if (!valid.OK) return { msg: valid.msg, OK: false }
 		const created = await this.mongoService.CREATE_USER({
 			username: user.username,
-			password: user.password
+			password: user.password,
+			token: crypto.randomUUID()
 		})
 		if (!created.acknowledged) return { msg: '[Invalid Operation]: could not create user', OK: false }
 		return { msg: 'User created successfully', OK: true }
@@ -55,8 +56,8 @@ export class UserService {
 		if (!valid.OK) return { msg: valid.msg, OK: false }
 		const found: TUserCRUDResponse = await this.FindUserByName(user.username)
 		if (!found.OK) return { msg: '[Not Found]: user was not found', OK: false }
-		if (found.data.password !== user.password) return { msg: '[Incorrect Value]: passwords do not coincide', OK: false }
-		return { msg: found.msg, OK: true }
+		if (found.data.password !== user.password) return { msg: '[Incorrect Value]: incorrect password', OK: false }
+		return { msg: found.msg, OK: true, data: found.data }
 	}
 
 	ValidateSignIn(user: TUserDTO): TUserCRUDResponse {
@@ -94,6 +95,8 @@ export class UserService {
 		const foundById: TUserCRUDResponse = await this.FindUserById(user.id)
 		if (!foundById.OK) return { msg: '[Invalid Operation]: user was not found', OK: false }
 
+		if (foundById.data.token !== user.token) return { msg: '[Invalid Operation]: incorrect token', OK: false }
+
 		const foundByName: TUserCRUDResponse = await this.FindUserByName(user.username)
 		if (foundByName.OK) return { msg: '[Invalid Username]: username already taken', OK: false }
 
@@ -102,10 +105,13 @@ export class UserService {
 	//#endregion Update
 
 	//#region Delete
-	async DeleteUser(id: string): Promise<TUserCRUDResponse> {
-		if (!id) return { msg: '[Missing Field]: user id was not provided', OK: false }
-		if (typeof id !== 'string') return { msg: '[Invalid Type]: user id is not a string', OK: false }
-		const { deletedUser, deletedNote } = await this.mongoService.DELETE_USER(id)
+	async DeleteUser(user: { id: string, token: string }): Promise<TUserCRUDResponse> {
+		if (!user.id) return { msg: '[Missing Field]: user id was not provided', OK: false }
+		if (typeof user.id !== 'string') return { msg: '[Invalid Type]: user id is not a string', OK: false }
+		const foundById: TUserCRUDResponse = await this.FindUserById(user.id)
+		if (!foundById.OK) return { msg: '[Invalid Operation]: user was not found', OK: false }
+		if (foundById.data.token !== user.token) return { msg: '[Invalid Operation]: incorrect token', OK: false }
+		const { deletedUser, deletedNote } = await this.mongoService.DELETE_USER(user.id)
 		if (!deletedUser.acknowledged) return { msg: '[Invalid Operation]: could not delete user', OK: false }
 		if (!deletedNote.acknowledged) return { msg: '[Invalid Operation]: could not delete the notes owned by the user', OK: false }
 		return { msg: 'User deleted successfully', OK: true }

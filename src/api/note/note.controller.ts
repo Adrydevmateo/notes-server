@@ -6,10 +6,10 @@ import { TNoteCRUDResponse, TNoteDTO } from './note.interface';
 export class NoteController {
 	constructor(private service: NoteService) { }
 
-	@Get()
-	GetNotes() {
-		return this.service.FindNotes()
-	}
+	// @Get()
+	// GetNotes() {
+	// 	return this.service.FindNotes()
+	// }
 
 	@Get(':ownerId')
 	GetNotesByOwner(@Param() params: { ownerId: string }) {
