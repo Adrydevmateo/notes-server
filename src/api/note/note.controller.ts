@@ -19,21 +19,21 @@ export class NoteController {
 	@Post()
 	async CreateNote(@Body() reqBody: TNoteDTO): Promise<TNoteCRUDResponse> {
 		const created = await this.service.CreateNote(reqBody)
-		if (!created.OK) throw new HttpException(created.msg, HttpStatus.NOT_ACCEPTABLE)
-		return { msg: created.msg, OK: true }
+		if (!created.OK) return { msg: created.msg, statusCode: HttpStatus.NOT_ACCEPTABLE, OK: false }
+		return { msg: created.msg, OK: true, statusCode: HttpStatus.OK }
 	}
 
 	@Patch()
 	async UpdateNote(@Body() reqBody: TNoteDTO): Promise<TNoteCRUDResponse> {
 		const updated = await this.service.UpdateNote(reqBody)
-		if (!updated.OK) throw new HttpException(updated.msg, HttpStatus.NOT_ACCEPTABLE)
-		return { msg: updated.msg, OK: true }
+		if (!updated.OK) return { msg: updated.msg, statusCode: HttpStatus.NOT_ACCEPTABLE, OK: false }
+		return { msg: updated.msg, OK: true, statusCode: HttpStatus.OK }
 	}
 
 	@Delete()
 	async DeleteNote(@Body() reqBody: { ownerId: string }): Promise<TNoteCRUDResponse> {
 		const deleted = await this.service.DeleteNote(reqBody.ownerId)
-		if (!deleted.OK) throw new HttpException(deleted.msg, HttpStatus.NOT_ACCEPTABLE)
-		return { msg: deleted.msg, OK: true }
+		if (!deleted.OK) return { msg: deleted.msg, statusCode: HttpStatus.NOT_ACCEPTABLE, OK: false }
+		return { msg: deleted.msg, OK: true, statusCode: HttpStatus.OK }
 	}
 }
